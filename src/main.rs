@@ -13,6 +13,7 @@ fn main() {
 
   println!("{:?}", args);
   let mode: &str = &args[1];
+  println!("git {}", mode);
 
   match mode {
     "add" => {
@@ -35,15 +36,19 @@ fn main() {
           let bytes = object.as_bytes();
 
           // SHA-1を通してIDを生成
-          let mut id = Sha1::new();
-          id.update(bytes);
-          println!("{:?}", id.finalize());
+          let mut sha1 = Sha1::new();
+          sha1.update(bytes);
+          let id = sha1.finalize().iter().map(|&byte| format!("{:x}", byte)).collect::<String>();
+          println!("blob {}", id);
 
           // Zlibで圧縮してcontentsを生成
           let mut zlib = ZlibEncoder::new(Vec::new(), Compression::default());
           zlib.write_all(bytes);
-          let contents = zlib.finish();
-          println!("{:?}", contents);
+          let contents = match zlib.finish() {
+            Ok(content) => content.iter().map(|&byte| format!("{:x}", byte)).collect::<String>(),
+            Err(_) => panic!("Failed compress with zlib-encode"),
+          };
+          println!("content {}", contents);
         }
       }
     },
