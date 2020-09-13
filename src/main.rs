@@ -4,6 +4,8 @@ use std::env;
 use std::fs::File;
 use std::io::prelude::*;
 use sha1::{Sha1, Digest};
+use flate2::Compression;
+use flate2::write::ZlibEncoder;
 
 fn main() {
   let args: Vec<String> = env::args().collect();
@@ -30,10 +32,18 @@ fn main() {
 
       match data.expect("Failed to unwrap blob object") {
         blob::Blob(object) => {
-          // blob objectからIDを生成
+          let bytes = object.as_bytes();
+
+          // SHA-1を通してIDを生成
           let mut id = Sha1::new();
-          id.update(object.as_bytes());
+          id.update(bytes);
           println!("{:?}", id.finalize());
+
+          // Zlibで圧縮してcontentsを生成
+          let mut zlib = ZlibEncoder::new(Vec::new(), Compression::default());
+          zlib.write_all(bytes);
+          let contents = zlib.finish();
+          println!("{:?}", contents);
         }
       }
     },
