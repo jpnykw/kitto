@@ -3,6 +3,7 @@ mod blob;
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
+use sha1::{Sha1, Digest};
 
 fn main() {
   let args: Vec<String> = env::args().collect();
@@ -26,7 +27,15 @@ fn main() {
 
       // 中身をblob objectに変換
       let data = blob::encode(String::from(contents));
-      println!("{:?}", data.unwrap());
+
+      match data.expect("Failed to unwrap blob object") {
+        blob::Blob(object) => {
+          // blob objectからIDを生成
+          let mut id = Sha1::new();
+          id.update(object.as_bytes());
+          println!("{:?}", id.finalize());
+        }
+      }
     },
 
     _ => {

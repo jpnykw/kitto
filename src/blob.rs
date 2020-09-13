@@ -1,5 +1,5 @@
 #[derive(Debug)]
-pub struct Blob (String);
+pub struct Blob(pub String);
 
 pub fn encode(text: String) -> Option<Blob> {
   let length = text.chars().count();
