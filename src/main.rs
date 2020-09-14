@@ -6,6 +6,11 @@ use std::io::prelude::*;
 use sha1::{Sha1, Digest};
 use flate2::Compression;
 use flate2::write::ZlibEncoder;
+use std::slice::Iter;
+
+fn join_iter(iter: Iter<'_, u8>) -> String {
+  iter.map(|&byte| format!("{:x}", byte)).collect::<String>()
+}
 
 fn main() {
   let args: Vec<String> = env::args().collect();
@@ -38,14 +43,14 @@ fn main() {
           // SHA-1を通してIDを生成
           let mut sha1 = Sha1::new();
           sha1.update(bytes);
-          let id = sha1.finalize().iter().map(|&byte| format!("{:x}", byte)).collect::<String>();
+          let id = join_iter(sha1.finalize().iter());
           println!("blob {}", id);
 
           // Zlibで圧縮してcontentsを生成
           let mut zlib = ZlibEncoder::new(Vec::new(), Compression::default());
           zlib.write_all(bytes);
           let contents = match zlib.finish() {
-            Ok(content) => content.iter().map(|&byte| format!("{:x}", byte)).collect::<String>(),
+            Ok(content) => join_iter(content.iter()),
             Err(_) => panic!("Failed compress with zlib-encode"),
           };
           println!("content {}", contents);
