@@ -12,6 +12,12 @@ fn join_iter(iter: Iter<'_, u8>) -> String {
   iter.map(|&byte| format!("{:x}", byte)).collect::<String>()
 }
 
+fn sha1(content: &String) -> String {
+  let mut sha1 = Sha1::new();
+  sha1.update(content.as_bytes());
+  join_iter(sha1.finalize().iter())
+}
+
 fn main() {
   let args: Vec<String> = env::args().collect();
   if args.len() < 2 { panic!("Select mode"); }
@@ -41,9 +47,7 @@ fn main() {
           let bytes = object.as_bytes();
 
           // SHA-1を通してIDを生成
-          let mut sha1 = Sha1::new();
-          sha1.update(bytes);
-          let id = join_iter(sha1.finalize().iter());
+          let id = sha1(&object);
           println!("blob {}", id);
 
           // Zlibで圧縮してcontentsを生成
@@ -62,5 +66,29 @@ fn main() {
       println!("you can learn about how to use with help")
     }
   }
+}
+
+#[test]
+fn sha1_case_a() {
+  assert_eq!(
+    sha1(&String::from("a")),
+    String::from("86f7e437faa5a7fce15d1ddcb9eaeaea377667b8")
+  );
+}
+
+#[test]
+fn sha1_case_b() {
+  assert_eq!(
+    sha1(&String::from("b")),
+    String::from("e9d71f5ee7c92d6dc9e92ffdad17b8bd49418f98")
+  );
+}
+
+#[test]
+fn sha1_case_c() {
+  assert_eq!(
+    sha1(&String::from("c")),
+    String::from("84a516841ba77a5b4648de2cd0dfcb30ea46dbb4")
+  );
 }
 
