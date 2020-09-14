@@ -9,7 +9,7 @@ use flate2::write::ZlibEncoder;
 use std::slice::Iter;
 
 fn join_iter(iter: Iter<'_, u8>) -> String {
-  iter.map(|&byte| format!("{:x}", byte)).collect::<String>()
+  iter.map(|&byte| format!("{:<02x}", byte)).collect::<String>()
 }
 
 fn sha1(content: &String) -> String {
@@ -40,9 +40,10 @@ fn main() {
       .expect("Something went wrong reading the file");
 
       // 中身をblob objectに変換
-      let data = blob::encode(String::from(contents));
+      let blob_object = blob::encode(String::from(contents));
+      println!("object {:?}", blob_object);
 
-      match data.expect("Failed to unwrap blob object") {
+      match blob_object.expect("Failed to unwrap blob object") {
         blob::Blob(object) => {
           let bytes = object.as_bytes();
 
@@ -89,6 +90,14 @@ fn sha1_case_c() {
   assert_eq!(
     sha1(&String::from("c")),
     String::from("84a516841ba77a5b4648de2cd0dfcb30ea46dbb4")
+  );
+}
+
+#[test]
+fn sha1_case_git() {
+  assert_eq!(
+    sha1(&String::from("git")),
+    String::from("46f1a0bd5592a2f9244ca321b129902a06b53e03")
   );
 }
 
