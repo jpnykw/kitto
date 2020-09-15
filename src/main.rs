@@ -5,7 +5,37 @@ mod ext;
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
+
 use sha1::{Sha1, Digest};
+use clap::Clap;
+
+#[derive(Clap)]
+#[clap(version = "0.1.0", author = "jpnykw <jpnykw.com>")]
+struct Opts {
+  /// Sets a custom config file. Could have been an Option<T> with no default too
+  #[clap(short, long, default_value = "default.conf")]
+  config: String,
+  /// Some input. Because this isn't an Option<T> it's required to be used
+  input: String,
+  /// A level of verbosity, and can be used multiple times
+  #[clap(short, long, parse(from_occurrences))]
+  verbose: i32,
+  #[clap(subcommand)]
+  subcmd: SubCommand,
+}
+
+#[derive(Clap)]
+enum SubCommand {
+  #[clap(version = "0.1.0", author = "jpnykw <jpnykw.com>")]
+  Test(Test),
+}
+
+#[derive(Clap)]
+struct Test {
+  /// Print debug info
+  #[clap(short)]
+  debug: bool
+}
 
 fn sha1(content: &String) -> String {
   let mut sha1 = Sha1::new();
@@ -14,6 +44,13 @@ fn sha1(content: &String) -> String {
 }
 
 fn main() {
+  let opts: Opts = Opts::parse();
+  println!("Value for config: {}", opts.config);
+  println!("Using input file: {}", opts.input);
+
+  /*
+
+  // TODO: 引数の処理をclapで書き換える
   let args: Vec<String> = env::args().collect();
   if args.len() < 2 { panic!("Select mode"); }
   // println!("{:?}", args);
@@ -71,6 +108,8 @@ fn main() {
       println!("you can learn about how to use with help")
     }
   }
+
+  */
 }
 
 #[test]
