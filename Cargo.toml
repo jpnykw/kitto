@@ -1,5 +1,5 @@
 [package]
-name = "git"
+name = "kitto"
 version = "0.1.0"
 authors = ["jpnykw <jpnykw@gmail.com>"]
 edition = "2018"
@@ -9,4 +9,5 @@ edition = "2018"
 [dependencies]
 sha-1 = "0.9.1"
 flate2 = "1.0.17"
-clap = "2.33.3"
+clap = "3.0.0-beta.1"
+
