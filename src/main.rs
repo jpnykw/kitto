@@ -61,7 +61,7 @@ fn main() {
 
           // 中身をblob objectに変換
           let blob_object = blob::encode(String::from(contents));
-          println!("object {:?}", blob_object);
+          // println!("object {:?}", blob_object);
 
           match blob_object.expect("Failed to unwrap blob object") {
             blob::Blob(object) => {
@@ -69,11 +69,11 @@ fn main() {
 
               // SHA-1を通してIDを生成
               let id = sha1(&object);
-              println!("blob {}", id);
+              println!("→ {:<8} {}", "ID", id);
 
               // objectを圧縮して
               let object = zlib::compress(object);
-              println!("object {}", object);
+              println!("→ {:<8} {}", "Content", object);
 
               // (確認のため) 展開してみる
               zlib::decompress(object);
@@ -81,7 +81,13 @@ fn main() {
           }
         },
         SubCommand::Cat_File(args) => {
-          println!("cat args -> {:?}", args);
+          // オブジェクトを受け取って
+          let object = args.path;
+          println!("object {}", object);
+
+          // 展開する
+          let unzip_object = zlib::decompress(object.to_string());
+          println!("object {}", unzip_object);
         },
         _ => {
           // 存在しないよ
@@ -94,35 +100,6 @@ fn main() {
       println!("Select subcommand.");
     }
   };
-
-  /*
-
-  // TODO: 引数の処理をclapで書き換える
-  let args: Vec<String> = env::args().collect();
-  if args.len() < 2 { panic!("Select mode"); }
-  // println!("{:?}", args);
-
-  let mode: &str = &args[1];
-  println!("git {}", mode);
-
-  match mode {
-    "cat-file" => {
-      if args.len() < 3 { panic!("Add object"); }
-      // オブジェクトを受け取って
-      let object = &args[2];
-      println!("object {}", object);
-
-      // 展開する
-      let unzip_object = zlib::decompress(object.to_string());
-      println!("object {}", unzip_object);
-    }
-
-    _ => {
-      println!("you can learn about how to use with help")
-    }
-  }
-
-  */
 }
 
 #[test]
