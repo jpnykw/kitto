@@ -20,10 +20,20 @@ struct Opts {
 enum SubCommand {
   #[clap(version = "0.0.1")]
   Add(Add),
+  #[clap(version = "0.0.1")]
+  Cat_File(Cat_File)
 }
 
 #[derive(Clap, Debug)]
 struct Add {
+  #[clap(required = true)]
+  path: String,
+}
+
+#[derive(Clap, Debug)]
+struct Cat_File {
+  #[clap(long)]
+  p: Option<bool>, // -p 調べる
   #[clap(required = true)]
   path: String,
 }
@@ -36,8 +46,28 @@ fn sha1(content: &String) -> String {
 
 fn main() {
   let opts: Opts = Opts::parse();
-  // println!("いぬ {}", opts.add);
-  println!("いぬ {:?}", opts.subcmd);
+
+  match opts.subcmd {
+    Some(command) => {
+      // 指定されたから分岐するよ
+      match command {
+        SubCommand::Add(args) => {
+          println!("add args -> {:?}", args);
+        },
+        SubCommand::Cat_File(args) => {
+          println!("cat args -> {:?}", args);
+        },
+        _ => {
+          // 存在しないよ
+          println!("Unknown subcommand.");
+        }
+      };
+    },
+    None => {
+      // 何も指定されなかったよ
+      println!("Select subcommand.");
+    }
+  };
 
   /*
 
