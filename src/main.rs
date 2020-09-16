@@ -52,7 +52,33 @@ fn main() {
       // 指定されたから分岐するよ
       match command {
         SubCommand::Add(args) => {
-          println!("add args -> {:?}", args);
+          // 指定したパスのファイルを読むよ
+          let mut file = File::open(args.path).expect("Invalid path");
+          let mut contents = String::new();
+          file.read_to_string(&mut contents)
+          // 読み込みに失敗したよ
+          .expect("Something went wrong reading the file");
+
+          // 中身をblob objectに変換
+          let blob_object = blob::encode(String::from(contents));
+          println!("object {:?}", blob_object);
+
+          match blob_object.expect("Failed to unwrap blob object") {
+            blob::Blob(object) => {
+              let bytes = object.as_bytes();
+
+              // SHA-1を通してIDを生成
+              let id = sha1(&object);
+              println!("blob {}", id);
+
+              // objectを圧縮して
+              let object = zlib::compress(object);
+              println!("object {}", object);
+
+              // (確認のため) 展開してみる
+              zlib::decompress(object);
+            }
+          }
         },
         SubCommand::Cat_File(args) => {
           println!("cat args -> {:?}", args);
@@ -80,40 +106,6 @@ fn main() {
   println!("git {}", mode);
 
   match mode {
-    "add" => {
-      // パスを指定して
-      if args.len() < 3 { panic!("Add file path"); }
-      let path: &str = &args[2];
-
-      // ファイルを開いて
-      let mut file = File::open(path).expect("Invalid path");
-      let mut contents = String::new();
-      file.read_to_string(&mut contents)
-      // 読み込みに失敗したよ
-      .expect("Something went wrong reading the file");
-
-      // 中身をblob objectに変換
-      let blob_object = blob::encode(String::from(contents));
-      println!("object {:?}", blob_object);
-
-      match blob_object.expect("Failed to unwrap blob object") {
-        blob::Blob(object) => {
-          let bytes = object.as_bytes();
-
-          // SHA-1を通してIDを生成
-          let id = sha1(&object);
-          println!("blob {}", id);
-
-          // objectを圧縮して
-          let object = zlib::compress(object);
-          println!("object {}", object);
-
-          // 展開してみる
-          zlib::decompress(object);
-        }
-      }
-    },
-
     "cat-file" => {
       if args.len() < 3 { panic!("Add object"); }
       // オブジェクトを受け取って
