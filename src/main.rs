@@ -12,29 +12,20 @@ use clap::Clap;
 #[derive(Clap)]
 #[clap(version = "0.1.0", author = "jpnykw <jpnykw.com>")]
 struct Opts {
-  /// Sets a custom config file. Could have been an Option<T> with no default too
-  #[clap(short, long, default_value = "default.conf")]
-  config: String,
-  /// Some input. Because this isn't an Option<T> it's required to be used
-  input: String,
-  /// A level of verbosity, and can be used multiple times
-  #[clap(short, long, parse(from_occurrences))]
-  verbose: i32,
   #[clap(subcommand)]
-  subcmd: SubCommand,
+  subcmd: Option<SubCommand>,
 }
 
-#[derive(Clap)]
+#[derive(Clap, Debug)]
 enum SubCommand {
-  #[clap(version = "0.1.0", author = "jpnykw <jpnykw.com>")]
-  Test(Test),
+  #[clap(version = "0.0.1")]
+  Add(Add),
 }
 
-#[derive(Clap)]
-struct Test {
-  /// Print debug info
-  #[clap(short)]
-  debug: bool
+#[derive(Clap, Debug)]
+struct Add {
+  #[clap(required = true)]
+  path: String,
 }
 
 fn sha1(content: &String) -> String {
@@ -45,8 +36,8 @@ fn sha1(content: &String) -> String {
 
 fn main() {
   let opts: Opts = Opts::parse();
-  println!("Value for config: {}", opts.config);
-  println!("Using input file: {}", opts.input);
+  // println!("いぬ {}", opts.add);
+  println!("いぬ {:?}", opts.subcmd);
 
   /*
 
