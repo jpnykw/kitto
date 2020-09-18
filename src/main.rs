@@ -19,10 +19,15 @@ struct Opts {
 #[derive(Clap, Debug)]
 enum SubCommand {
   #[clap(version = "0.0.1")]
+  Init(Init),
+  #[clap(version = "0.0.1")]
   Add(Add),
   #[clap(version = "0.0.1")]
   Cat_File(Cat_File)
 }
+
+#[derive(Clap, Debug)]
+struct Init {}
 
 #[derive(Clap, Debug)]
 struct Add {
@@ -51,7 +56,12 @@ fn main() {
     Some(command) => {
       // 指定されたから分岐するよ
       match command {
+        SubCommand::Init(_) => {
+          // .gitを作るよ
+          println!("init");
+        },
         SubCommand::Add(args) => {
+          println!("add");
           // 指定したパスのファイルを読むよ
           let mut file = File::open(args.path).expect("Invalid path");
           let mut contents = String::new();
