@@ -70,7 +70,7 @@ fn main() {
           .expect("Something went wrong reading the file");
 
           // 中身をblob objectに変換
-          let blob_object = blob::encode(String::from(contents));
+          let blob_object = blob::encode(&String::from(contents));
           // println!("object {:?}", blob_object);
 
           match blob_object.expect("Failed to unwrap blob object") {
@@ -113,34 +113,98 @@ fn main() {
 }
 
 #[test]
-fn sha1_case_a() {
+fn sha1_case_1() {
   assert_eq!(
     sha1(&String::from("a")),
-    String::from("86f7e437faa5a7fce15d1ddcb9eaeaea377667b8")
+    String::from("86f7e437faa5a7fce15d1ddcb9eaeaea377667b8"),
   );
 }
 
 #[test]
-fn sha1_case_b() {
+fn sha1_case_2() {
   assert_eq!(
     sha1(&String::from("b")),
-    String::from("e9d71f5ee7c92d6dc9e92ffdad17b8bd49418f98")
+    String::from("e9d71f5ee7c92d6dc9e92ffdad17b8bd49418f98"),
   );
 }
 
 #[test]
-fn sha1_case_c() {
-  assert_eq!(
-    sha1(&String::from("c")),
-    String::from("84a516841ba77a5b4648de2cd0dfcb30ea46dbb4")
-  );
-}
-
-#[test]
-fn sha1_case_git() {
+fn sha1_case_3() {
   assert_eq!(
     sha1(&String::from("git")),
-    String::from("46f1a0bd5592a2f9244ca321b129902a06b53e03")
+    String::from("46f1a0bd5592a2f9244ca321b129902a06b53e03"),
   );
+}
+
+#[test]
+fn blob_encode_1() {
+  assert_eq!(
+    blob::encode(&String::from("Hello World")).unwrap(),
+    blob::Blob(String::from("blob 11\0Hello World")),
+  );
+}
+
+#[test]
+fn blob_encode_2() {
+  assert_eq!(
+    blob::encode(&String::from("Hello\nWorld")).unwrap(),
+    blob::Blob(String::from("blob 11\0Hello\nWorld")),
+  );
+}
+
+#[test]
+fn blob_encode_3() {
+  assert_eq!(
+    blob::encode(&String::from("Nyanko\0World")).unwrap(),
+    blob::Blob(String::from("blob 12\0Nyanko\0World")),
+  );
+}
+
+#[test]
+fn blob_decode_1() {
+  assert_eq!(
+    blob::decode(blob::Blob(String::from("blob 11\0Hello World"))),
+    Some(String::from("Hello World"))
+  );
+}
+
+#[test]
+fn blob_decode_2() {
+  assert_eq!(
+    blob::decode(blob::Blob(String::from("blob 11\0Hello\nWorld"))),
+    Some(String::from("Hello\nWorld"))
+  );
+}
+
+#[test]
+fn blob_decode_3() {
+  assert_eq!(
+    blob::decode(blob::Blob(String::from("blob 11\0Hello\0World"))),
+    Some(String::from("Hello\0World"))
+  );
+}
+
+#[test]
+fn blob_bridge_1() {
+  let data = String::from("Nyanko Ippai");
+  let encode = blob::encode(&data).unwrap();
+  let decode = blob::decode(encode).unwrap();
+  assert_eq!(&data, &decode);
+}
+
+#[test]
+fn blob_bridge_2() {
+  let data = String::from("Nyanko\nIppai");
+  let encode = blob::encode(&data).unwrap();
+  let decode = blob::decode(encode).unwrap();
+  assert_eq!(&data, &decode);
+}
+
+#[test]
+fn blob_bridge_3() {
+  let data = String::from("Nyanko\0Ippai");
+  let encode = blob::encode(&data).unwrap();
+  let decode = blob::decode(encode).unwrap();
+  assert_eq!(&data, &decode);
 }
 
