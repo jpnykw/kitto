@@ -3,7 +3,8 @@ mod zlib;
 mod ext;
 
 use std::env;
-use std::fs::File;
+use std::fs;
+use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
 
 use sha1::{Sha1, Digest};
@@ -57,8 +58,29 @@ fn main() {
       // 指定されたから分岐するよ
       match command {
         SubCommand::Init(_) => {
-          // .gitを作るよ
           println!("init");
+          // .git の代わりに .kitto を作成
+          match fs::create_dir(".kitto") {
+            Err(why) => println!("! {:?}", why.kind()),
+            Ok(_) => {},
+          };
+          // 中身は objects, refs/heads, refs/tags
+          match fs::create_dir(".kitto/objects") {
+            Err(why) => println!("! {:?}", why.kind()),
+            Ok(_) => {},
+          };
+          match fs::create_dir(".kitto/refs") {
+            Err(why) => println!("! {:?}", why.kind()),
+            Ok(_) => {},
+          };
+          match fs::create_dir(".kitto/refs/heads") {
+            Err(why) => println!("! {:?}", why.kind()),
+            Ok(_) => {},
+          };
+          match fs::create_dir(".kitto/refs/tags") {
+            Err(why) => println!("! {:?}", why.kind()),
+            Ok(_) => {},
+          };
         },
         SubCommand::Add(args) => {
           println!("add");
@@ -69,7 +91,7 @@ fn main() {
           // 読み込みに失敗したよ
           .expect("Something went wrong reading the file");
 
-          // 中身をblob objectに変換
+          // 中身を blob object に変換
           let blob_object = blob::encode(&String::from(contents));
           // println!("object {:?}", blob_object);
 
@@ -77,11 +99,11 @@ fn main() {
             blob::Blob(object) => {
               let bytes = object.as_bytes();
 
-              // SHA-1を通してIDを生成
+              // SHA-1 を通して ID を生成
               let id = sha1(&object);
               println!("→ {:<8} {}", "ID", id);
 
-              // objectを圧縮して
+              // object 圧縮して
               let object = zlib::compress(object);
               println!("→ {:<8} {}", "Content", object);
 
@@ -91,7 +113,7 @@ fn main() {
           }
         },
         SubCommand::Cat_File(args) => {
-          // オブジェクトを受け取って
+          // object 受け取って
           let object = args.path;
           println!("object {}", object);
 
